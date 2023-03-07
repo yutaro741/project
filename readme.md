@@ -10,7 +10,7 @@ Design Statement
 To solve my client's problem, I will create an application to manage the tasks for him. I will be using Python as the primary programming language for the application, KivyMD for the graphical user interface (GUI), and SQLAlchemy to manipulate the database in which the tasks logs will be stored. The application will consist of a login page, a registration page, main page, page to edit the task, and page to see all of the task.
 
 System
-The application to manage appliance usage will be developed on the programming editor PyCharm version 2022.3.2, run on a 2020 MacBook Pro using the OS macOS Big Sur version 13.2.1. Through PyCharm, the application will be coded using Python, KivyMD for the GUI, and SQLAlchemy to manipulate the database.
+The application to manage appliance usage will be developed on the programming editor PyCharm version 2022.3.2, run on a 2020 MacBook Pro using the OS macOS Big Sur version 13.2.1. Through PyCharm, the application will be coded using Python, KivyMD for the GUI, and SQLite to manipulate the database.
 
 ## Software Justification
 Python
@@ -21,9 +21,8 @@ KivyMD
 
 I will be using KivyMD to create the graphical user interface, which is an open source library capable of creating graphical user interfaces (GUI) for applications. In this project, the GUI will act as the communication between the user, who will input commands and view information through their keyboard and computer screen, and the program, which will manipulate the database to create, add, edit and delete data. The GUI is a crucial component of this application, as it will allow the client, or anyone including those without experience in programming, to easily access the logs.
 
-SQLAlchemy
+SQLite
 
-I will be using SQLAlchemy to manipulate the database for the following reasons. Firstly, "SQLAlchemy is the Python SQL toolkit and Object Relational Mapper that gives application developers the full power and flexibility of SQL.". Since I will be using Python, SQLAlchemy will allow me to take advantage of the SQL programming language, which is used for operating databases. Additionally, since it is an Object Relational Mapper (ORM), I will be able to query and manipulate data from a database without having to learn SQL, and instead use the native programming language I am familiar with, Python.
 
 
 ## Success Criteria
@@ -37,9 +36,25 @@ I will be using SQLAlchemy to manipulate the database for the following reasons.
 
 # Criteria B: Design
 ## System Diagram
-
+![](https://github.com/yutaro741/project/blob/main/photo/Screen%20Shot%202023-03-07%20at%2016.26.18.png)
 ## Flow Diagrams
+Login system
+![](https://github.com/yutaro741/project/blob/main/photo/F343FB60-E71B-4140-94DD-82DE76A4D329.jpg)
 
+Registerasion system
+![](https://github.com/yutaro741/project/blob/main/photo/CD6F0DF9-D993-485E-BC88-E8C2FA7F2901.jpg)
+
+Add note system
+![](https://github.com/yutaro741/project/blob/main/photo/177CC81C-FD04-4678-806C-FBE31C8F4453.jpg)
+
+Edit note system
+![](https://github.com/yutaro741/project/blob/main/photo/260CF555-6A80-420A-BCBA-51ECE1080E96.jpg)
+
+Show data table system
+![](https://github.com/yutaro741/project/blob/main/photo/657BF954-12FD-4CFC-908D-CC591DB00141.jpg)
+
+## Wire frame
+![](https://github.com/yutaro741/project/blob/main/photo/83343B53-AD3A-4DAE-A3B8-C9D37D1D7FED.jpg)
 
 ## Record of Tasks
 | Task No 	| task                                                                	| Planned Outcome                                                                                                                	| Time estimate 	| Target completion date 	| Criterion 	|
