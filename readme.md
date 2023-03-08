@@ -46,6 +46,9 @@ I have chosen to use SQLite as the database management system for this project. 
 ## UML Diagram
 ![](https://github.com/yutaro741/project/blob/main/photo/Screen%20Shot%202023-03-09%20at%201.26.56.png)
 
+## ER diagram
+![](https://github.com/yutaro741/project/blob/main/photo/9565C84E-E414-4E24-887A-E2F0D472EADF.jpg)
+
 ## Flow Diagrams
 Login system
 ![](https://github.com/yutaro741/project/blob/main/photo/F343FB60-E71B-4140-94DD-82DE76A4D329.jpg)
