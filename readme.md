@@ -42,6 +42,10 @@ I have chosen to use SQLite as the database management system for this project. 
 # Criteria B: Design
 ## System Diagram
 ![](https://github.com/yutaro741/project/blob/main/photo/Screen%20Shot%202023-03-07%20at%2016.26.18.png)
+
+## UML Diagram
+![](https://github.com/yutaro741/project/blob/main/photo/Screen%20Shot%202023-03-09%20at%201.26.56.png)
+
 ## Flow Diagrams
 Login system
 ![](https://github.com/yutaro741/project/blob/main/photo/F343FB60-E71B-4140-94DD-82DE76A4D329.jpg)
