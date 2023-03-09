@@ -1,7 +1,8 @@
 # Project 3 Bernerd's app
 
-![](https://github.com/yutaro741/project/blob/main/photo/work1_image03%20copy.jpg)
+![](https://github.com/yutaro741/project/blob/main/photo/work1_image03%20copy.jpg)[^1]
 
+[^1]:https://webcomicgamma.takeshobo.co.jp/special/abyss_artwork/ Made in abyss background art work "narakumon"
 
 # Criteria A: Planning
 
