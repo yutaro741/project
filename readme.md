@@ -117,7 +117,1850 @@ Show data table system
 | Test deleting tasks.                           | Click the checkbox and press icon.           | Delete selected tasks.                                                                                 | Get ids of selected tasks and delete data from database. Reload again to show deleted tasks. |                5 |
 
 # Criteria C: Coding
+## Database configuration
+This application will use two databases, users and notes. "users" are used to manage the user id, username, email and password of the user account. "notes" are used to manage the id, user_id, title, due_date, category, description and color of the tasks. I made the project3.db file for manage the data. Also, I made main.py and main.kv.
+These are the steps for making the basic basic preparation for writing code in the python file.
+
+Firstly, I will make the python file, main.py and import everything that we need.
+```.py
+import sqlite3
+from kivymd.uix.screen import MDScreen
+from kivymd.app import MDApp
+import datetime
+import hashlib
+from kivymd.uix.pickers import MDDatePicker
+from kivymd.uix.pickers import MDColorPicker
+from typing import Union
+from kivymd.uix.datatables import MDDataTable
+```
+Then, I will make class database_handler() and class SaveMyData.
+```.py
+def rgba_to_hex(rgba):#Change the color data type [(rational number below 1), (number //), (num //), (1)] (RGBA) to #FFFFFF(#hexadecimal).
+    rgb = rgba[:3]
+    return '#{:02X}{:02X}{:02X}'.format(*[int(x*255) for x in rgb])
+
+def hex_to_rgba(hex_color, alpha=1.0):#Change the color data type #FFFFFF(#hexadecimal) to [(rational number below 1), (number //), (num //), (1)] (RGBA).
+    hex_color = hex_color.lstrip('#')
+    rgb = tuple(int(hex_color[i:i + 2], 16)/255 for i in (0, 2, 4))
+    return rgb + (alpha,)
+
+
+class SaveMyData:
+    #This class is used to save data used for one single login.
+    #Data will be reseted every time restarting the program.
+    id = 0
+    note = [0, 0, 0, 0, 0, 0, 0, 0]
+    editnote = 0
+    due = ">="
+    order = "ASC"
+    date = "2023-12-12"
+    categories = "Homework"
+    color = "#FFFFFF"
+    allcategory="*"
+
+class database_handler():
+    def __init__(self):
+        self.connection = sqlite3.connect("project3.db")
+        #Becasuse we will use only one database, database is automatically setted if you start this class.
+        self.cursor = self.connection.cursor()
+        #Make cursor
+
+    def run_query(self, query):
+        self.cursor.execute(query)
+        self.connection.commit()
+        #This will run query. This is used
+
+    def close(self):
+        self.connection.close()
+
+    def create_tables(self):#This program is used for only first time to make connection and make database.
+        query = f"""CREATE TABLE if not exists users(
+            id INTEGER PRIMARY KEY,
+            email text NOT NULL,
+            password text NOT NULL,
+            username text NOT NULL
+        );"""
+        self.run_query(query)
+
+    def create_note(self):#This program is used for only first time to make connection and make database.
+        query = f"""CREATE TABLE if NOT exists note(
+            id INTEGER PRIMARY KEY,
+            user_id INTEGER not NULL,
+            category TEXT not NULL,
+            due_date TEXT not NULL,
+            title TEXT not NULL,
+            description TEXT not NULL
+            color text DEFAULT '#FFFFFF'
+        );"""
+        self.run_query(query)
+
+    def register(self, username, email, password):
+        query = f"""INSERT INTO users(email, password, username) VALUES('{email}', '{hash(password)}', '{username}');"""
+        #Add account into database 'users'
+        self.run_query(query)
+        self.close()
+
+    def login(self, email, password):
+        query = f"""SELECT id from users WHERE email = '{email}' and password = '{hash(password)}'"""
+        if self.get_info(query) is None:#Search there is pair of email and hashed password in the users database.
+            return None
+        else:
+            #If there is data, return the user-id.
+            id = self.get_info(query)
+            return list(id[0])[0]
+            #The data is sended with list that contains tuple, so it is making data to one number.
+
+    def add_note(self, user_id, category, due_date, title, description, color):
+        query = f"""INSERT INTO note(user_id, category, due_date, title, description, color) VALUES ('{user_id}', '{category}', '{due_date}', '{title}', '{description}', '{color}')"""
+        #This program will add the task to database note
+        self.run_query(query)
+        self.close()
+
+    def edit_note(self, id, category, due_date, title, description, color):
+        query = f"""UPDATE note SET category='{category}', due_date='{due_date}', title='{title}', description='{description}', color='{color}' WHERE id = '{id}'"""
+        #This program will edit the note that id is given.
+        self.run_query(query)
+        self.close()
+
+    def get_info(self, query):
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
+        #Return all of imformation that satisify query conditions from database.
+
+make = database_handler()
+make.create_tables()
+make.create_note()
+make.close()
+```
+I will move create_tables() and create_notes() only once, and delete that program.
+Instead of that, I will add the program below to connect kivy file and python file with MDApp.
+```.py
+class main(MDApp):#code will run with this class.
+    def built(self):
+        return
+
+
+test = main()
+#Run main program to start showing the program.
+test.run()
+```
+Every time we move the python file, this will let the kivy file move as well.
+
+Finally, we will make kivy file, main.kv and make all of the screen that is needed. 
+```.py
+ScreenManager:
+    LoginScreen:
+        name: "LoginScreen"
+    RegistrationScreen:
+        name: "RegistrationScreen"
+    MainScreen:
+        name: "MainScreen"
+    EditingScreen:
+        name: "EditingScreen"
+    NoteAddingScreen:
+        name: "NoteAddingScreen"
+    AllTaskScreen:
+        name: "AllTaskScreen"
+```
+So, I finished the basic setting. we will build up the things from next.
+
+## Login and Registeration Screen
+First, I will make the GUI of login screen within kivy file.
+```.py
+<LoginScreen>:
+    FitImage:
+        source: "シンプルもやもや背景12-1.png"#background image
+    MDCard:
+        size_hint:.6, .8
+        #Main parts will be smaller than full screen.
+        pos_hint: {"center_x":.5, "center_y":.5}
+        orientation: "vertical"
+
+        MDLabel:
+        #Text to show how to login.
+            size_hint:1, .1
+            font_style:"H2"
+            text:"Login"
+            halign:"center"
+
+        MDTextField:
+        #Input the data to get email
+            id:email_in
+            hint_text:"enter email"
+            size_hint_x: .8
+            pos_hint:{"center_x":.5}
+            icon_left: 'email-outline'
+
+        MDTextField:
+        #Input the data to get password
+            id:password_in
+            hint_text:"enter password"
+            password: True
+            size_hint_x: .8
+            pos_hint:{"center_x":.5}
+            icon_left: "lock"
+
+        MDBoxLayout:
+            MDRaisedButton:
+            #Start the program if you press this button.
+                id: login
+                text:"Login"
+                md_bg_color: "#a8dadc"
+                on_press:root.try_login()
+                #If you press, try_login() in python file will be active.
+                size_hint:.5, .1
+
+            MDRaisedButton:#Go to register screen if you don't have account yet.
+                text: "Register"
+                md_bg_color: "#90ee90"
+                on_press:root.parent.current = "RegistrationScreen"
+                #Move the page to RegistrationScreen.
+                size_hint:.5, .1
+```
+
+Next, I will write python code for login screen. I set the name of def to try_login(), so I will use that.
+```.py
+def hash(message):
+    return hashlib.md5(message.encode("utf-8")).hexdigest()
+    #This is different way to hash with class, but it is still hash.
+
+class LoginScreen(MDScreen):
+    def try_login(self):#This programs runs if you press button.
+        email_entered = self.ids.email_in.text#Get the email.
+        email_entered = email_entered.replace(" ", "")
+        #Because space bar is automatically entered if it's change to english setting, delete all spaces.
+        password_enterd = self.ids.password_in.text
+        if database_handler().login(email=email_entered, password=password_enterd) is None:
+            #find if there is user data in database(user)
+            print(f"Incorrect email or password. Please try it again.")
+        else:
+            print("Login Success!!")
+            SaveMyData.id = database_handler().login(email=email_entered, password=password_enterd)
+            #Save the user-id to the class, becasue we will use this so many times after log in.
+            self.parent.current = "MainScreen"
+            #Go to main screen.
+```
+
+However, I can't login to the app because I don't have the account.
+So, I will make registratin system.
+Fortunetly, program of kivy file and python file is mostly same, so it is not hard to make it.
+
+kivy file:
+```.py
+<RegistrationScreen>:
+    FitImage:
+        source: "シンプルもやもや背景12-1.png"#background
+    MDCard:
+        size_hint:.6, .8
+        pos_hint: {"center_x":.5, "center_y":.5}
+        orientation: "vertical"
+
+        MDLabel:
+            size_hint:1, .1
+            font_style:"H2"
+            text:"Register"
+            halign:"center"
+
+        MDTextField:
+            id:uname
+            hint_text:"enter username"
+            size_hint_x: .8
+            pos_hint:{"center_x":.5}
+            icon_left: "rename"
+
+        MDTextField:
+            id:email_in
+            hint_text:"enter email"
+            size_hint_x: .8
+            pos_hint:{"center_x":.5}
+            icon_left: 'email-outline'
+
+        MDTextField:
+            id:passwd
+            hint_text:"enter password"
+            password: True
+            size_hint_x: .8
+            pos_hint:{"center_x":.5}
+            error: False
+            icon_left: 'lock'
+
+        MDTextField:
+            id:password_check
+            hint_text:"enter password_check"
+            password: True
+            size_hint_x: .8
+            pos_hint:{"center_x":.5}
+            error:False
+            icon_left: 'lock-check'
+
+        MDBoxLayout:
+            MDRaisedButton:
+                id: login
+                text:"Login"
+                md_bg_color: "#a8dadc"
+                on_press:root.parent.current = "LoginScreen"
+                size_hint:.5, .1
+
+            MDRaisedButton:
+                text: "Register"
+                md_bg_color: "#90ee90"
+                on_press:root.try_register()
+                size_hint:.5, .1
+```
+
+python file:
+```.py
+class RegistrationScreen(MDScreen):
+    def try_register(self):
+        email = self.ids.email_in.text
+        username = self.ids.uname.text
+        password = self.ids.passwd.text
+        #get email, username, password from application
+        if password == self.ids.password_check.text:
+            #Check password entered is same as second password enterd.
+            query = f"""SELECT id FROM users WHERE email = '{email}'"""
+            if database_handler().get_info(query) == []:
+                #Check there is no same account in the users database.
+                database_handler().register(username=username, email=email, password=password)
+                #Add the user to database
+                print("Register success!")
+                self.parent.current = "MainScreen"
+                #Go to mainscreen
+                SaveMyData.id = database_handler().login(email=email, password=password)
+                #Save userid because it will use a lot after that.
+            else:
+                print("This email is already used")
+        else:
+            print("error. Password and password check is not same")
+        database_handler().close()
+```
+## Main Screen
+Next, I will make the main screen, the screen that goes after you log in.
+kivy file:
+```.py
+def nowtime():#return time now with yyyymmdd structure.
+    dt = datetime.datetime.now()
+    if dt.month < 10:
+        month = f"0{dt.month}"
+    else:
+        month = dt.month
+    if dt.day < 10:
+        day = f"0{dt.day}"
+    else:
+        day = dt.day
+    out = f"{dt.year}{month}{day}"
+    return out
+
+<MainScreen>:
+    FitImage:
+        source: "シンプルもやもや背景12-1.png"
+    MDCard:
+        id: main_box
+        size_hint:.6, .8
+        pos_hint: {"center_x":.5, "center_y":.5}
+        orientation: "vertical"
+        MDLabel:
+            text:"Welcome to Task application!"
+            font_style:"H2"
+        MDBoxLayout:
+            orientation:"vertical"
+            MDLabel:
+                id: ResentTask
+                text: ""
+                font_style: "H2"
+            MDLabel:
+                id: DueTask
+                text: ""
+        MDBoxLayout:
+            orientation: "horizontal"
+            MDIconButton:
+                id:Add_note
+                icon: "pencil-plus"
+                on_press: root.parent.current = "NoteAddingScreen"
+            MDIconButton:
+                id:Logout
+                icon: "logout"
+                on_press: root.parent.current = "LoginScreen"
+            MDIconButton:
+                id:All_task
+                icon: "reorder-horizontal"
+                on_press: root.parent.current = "AllTaskScreen"
+```
+
+
+python file:
+```.py
+class MainScreen(MDScreen):
+    def on_pre_enter(self, *args):
+        query = f"""SELECT title, due_date from note WHERE due_date >= {nowtime()} and user_id = {SaveMyData.id}"""
+        db = database_handler()
+        db.cursor.execute(query)
+        data = db.cursor.fetchone()
+        # Find the "one" task that due date is not passed yet and most resent due date.
+        if data is None:
+            s = ["---", "---"]
+        else:
+            s = list(data)
+            #Let it list because I hate turple.
+        db.close()
+        self.ids.ResentTask.text = f"The most resent task is '{s[0]}'"
+        self.ids.DueTask.text = f"Deadline:{datetostr(s[1])}"
+        #Change the text in kivy to see the task easelly.
+```
+The database_handler() class is writtin on the top of the criteriaC, but you can also see below to see everything.
+
+## Add and Edit page.
+I made the main page, but because there is no task in the database, we have nothing to show.
+So, I will gonna make the page to add the task to the database.
+
+I use MDColorpicker and MDDatepicer to pick the date and color. Because of this, my 10 hours are getting to nothing. Also, I was getting able to use checkbox as well. Those 3 are where there is originality in my project.
+kivy file:
+```.py
+<NoteAddingScreen>:
+    FitImage:
+        source: "シンプルもやもや背景12-1.png"
+    MDCard:
+        size_hint:.6, .8
+        pos_hint: {"center_x":.5, "center_y":.5}
+        orientation: "vertical"
+        MDBoxLayout:
+            test:""
+            font_style:"H2"
+        MDBoxLayout:
+            orientation: "vertical"
+            spacing: dp(20)
+            MDLabel:
+                size_hint:1, .1
+                font_style:"H2"
+                text:"Add note"
+                halign:"center"
+            MDTextField:
+                id: title
+                hint_text:"enter title here"
+            MDTextField:
+                id: description
+                hint_text:"enter description here"
+
+        MDBoxLayout:
+            orientation:"vertical"
+            spacing: dp(20)
+            MDLabel:
+                text: 'Categories:'
+            MDBoxLayout:
+            #This is the checkboks that can choose categories.
+            #group:'options' will let the checkbox not to choose more than two things.
+            #active:True/false will make the initial setting to be pressed/not.
+                MDCheckbox:
+                    id: Homework
+                    group: 'options'
+                    size_hint_y: None
+                    active: True
+                    on_active: root.on_checkbox_active("Homework")
+                MDLabel:
+                    size_hint_y: None
+                    text:"Homework"
+                    size_hint_x: 1.8
+                MDCheckbox:
+                    id: CAS
+                    group: 'options'
+                    size_hint_y: None
+                    active: False
+                    on_active: root.on_checkbox_active("CAS")
+                MDLabel:
+                    size_hint_y: None
+                    text:"CAS"
+                MDCheckbox:
+                    id: Photo
+                    group: 'options'
+                    size_hint_y: None
+                    active: False
+                    on_active: root.on_checkbox_active("Photo")
+                MDLabel:
+                    size_hint_y: None
+                    text:"Photo"
+                MDCheckbox:
+                    id: Work
+                    group: 'options'
+                    size_hint_y: None
+                    active: False
+                    on_active: root.on_checkbox_active("Work")
+                MDLabel:
+                    size_hint_y: None
+                    text:"Work"
+                MDCheckbox:
+                    id: Others
+                    group: 'options'
+                    size_hint_y: None
+                    active: False
+                    on_active: root.on_checkbox_active("Others")
+                MDLabel:
+                    size_hint_y: None
+                    text:"Other"
+                    size_hint_x: 1.2
+        MDBoxLayout:
+            MDRoundFlatButton:
+                id: date
+                text: "Open date picker"
+                pos_hint: {'center_x': .5, 'center_y': .5}
+                on_release: root.show_date_picker()
+                md_bg_color:"orange"
+            MDRoundFlatButton:
+                id: toolbar
+                text: "Customize color"
+                pos_hint: {"center_x": .5, "center_y": .5}
+                on_release: root.open_color_picker()
+                md_bg_color: "FF0000"
+                text_color: "black"
+
+
+        MDBoxLayout:
+
+            MDIconButton:
+                id:Add_note
+                icon: "pencil-plus"
+                on_press: root.addNote()
+            MDIconButton:
+                id: BackMain
+                icon: "home"
+                on_press: root.parent.current = "MainScreen"
+```
+
+python file:
+```.py
+def strtodate(s:str):#Change the date data type yyyy-mm-dd (string type) to yyyymmdd (integer type)
+    s = str(s).replace("-", "")
+    return s
+
+def datetostr(s):#Change the date data type yyyymmdd (int type) to yyyy-mm-dd (str type)
+    s = str(s)
+    return f"{s[:4]}-{s[4:6]}-{s[6:]}"
+    
+class NoteAddingScreen(MDScreen):
+    def on_pre_enter(self):
+        self.ids.title.text = ""
+        self.ids.description.text = ""
+        #Set all of the data empty.
+
+    def on_checkbox_active(self, s):
+        SaveMyData.categories = s
+        #Run if the category is picked, and save it to the SaveMyData class.
+
+    def addNote(self):#run if addnote button is pressed.
+        title = self.ids.title.text
+        category = SaveMyData.categories
+        description = self.ids.description.text
+        due_date = strtodate(SaveMyData.date)#Change the text type of the date to string to integer. That will make database easyer to find which date is faster.
+        color = SaveMyData.color
+        id = SaveMyData.id
+        #Get title, category, description, due_date. color, id from kivy and saved data.
+        if title != "" and description != "":#Check if there is no empty space
+            database_handler().add_note(title=title, category=category, description=description, due_date=due_date, user_id=id, color=color)
+            print("Adding note success!")
+            #add the note with using the data we got.
+            self.parent.current = "MainScreen"
+            #Change the screen to mainscreen.
+        else:
+            print("Some parts is empty")
+
+    def show_date_picker(self):
+        date_dialog = MDDatePicker()
+        date_dialog.bind(on_save=self.on_save, on_cancel=self.on_cancel)
+        date_dialog.open()
+        #Open date picker. Original date setting is date of now.
+
+    def on_save(self, instance, value, date_range):
+        SaveMyData.date = value
+        return
+        #Run if the date is picked. Save it into Savemydata class.
+
+    def on_cancel(self, instance, value):
+        return
+
+    def open_color_picker(self):
+        color_picker = MDColorPicker(size_hint=(0.45, 0.85))
+        color_picker.open()
+        color_picker.bind(
+            on_select_color=self.on_select_color,
+            on_release=self.get_selected_color,
+        )
+        #open color picker, with original color blue.
+        #This program runs the very first time you open this page.
+
+    def update_color(self, color: list) -> None:
+        self.ids.toolbar.text_color = color
+        SaveMyData.color = rgba_to_hex(color)
+        #Runs if color is picked
+        #save color, and change the cokor in the button.
+        #make sure that data saved is im hex every time.
+
+    def get_selected_color(self,instance_color_picker:MDColorPicker,type_color:str,selected_color: Union):
+        self.update_color(selected_color[:-1] + [1])
+        #If color is selected, run the program to update color.
+
+    def on_select_color(self, instance_gradient_tab, color: list) -> None:
+        '''Called when a gradient image is clicked.'''
+```
+
+After you write the code for adding the tasks, you will gonna need a page to edit note.
+The code and GUI is mostly same with note adding page, so it is easy to make.
+
+kivy file:
+```.py
+<EditingScreen>:
+    FitImage:
+        source: "シンプルもやもや背景12-1.png"
+    MDCard:
+        size_hint:.6, .8
+        pos_hint: {"center_x":.5, "center_y":.5}
+        orientation: "vertical"
+        MDLabel:
+            size_hint:1, .1
+            font_style:"H2"
+            text:"Edit"
+            halign:"center"
+        MDBoxLayout:
+            orientation: "vertical"
+            MDTextField:
+                id: title
+                hint_text:"enter title here"
+            MDTextField:
+                id: description
+                hint_text:"enter description here"
+
+        MDBoxLayout:
+            orientation:"vertical"
+            MDLabel:
+                text: 'Categories:'
+                pos_hint: {"center_x":.5, "center_y":.5}
+            MDBoxLayout:
+                MDCheckbox:
+                    id: Homework
+                    group: 'options'
+                    size_hint_y: None
+                    active: False
+                    on_active: root.on_checkbox_active("Homework")
+                MDLabel:
+                    size_hint_y: None
+                    text:"Homework"
+                    size_hint_x: 1.8
+
+                MDCheckbox:
+                    id: CAS
+                    group: 'options'
+                    size_hint_y: None
+                    active: False
+                    on_active: root.on_checkbox_active("CAS")
+                MDLabel:
+                    size_hint_y: None
+                    text:"CAS"
+                MDCheckbox:
+                    id: Photo
+                    group: 'options'
+                    size_hint_y: None
+                    active: False
+                    on_active: root.on_checkbox_active("Photo")
+                MDLabel:
+                    size_hint_y: None
+                    text:"Photo"
+                MDCheckbox:
+                    id: Work
+                    group: 'options'
+                    size_hint_y: None
+                    active: False
+                    on_active: root.on_checkbox_active("Work")
+                MDLabel:
+                    size_hint_y: None
+                    text:"Work"
+                MDCheckbox:
+                    id: Others
+                    group: 'options'
+                    size_hint_y: None
+                    active: False
+                    on_active: root.on_checkbox_active("Others")
+                MDLabel:
+                    size_hint_y: None
+                    text:"Others"
+
+
+        MDBoxLayout:
+            MDRoundFlatButton:
+                id: date
+                text: "Open date picker"
+                pos_hint: {'center_x': .5, 'center_y': .5}
+                on_release: root.show_date_picker()
+                md_bg_color:"orange"
+            MDRoundFlatButton:
+                id: toolbar
+                text: "Customize color"
+                pos_hint: {"center_x": .5, "center_y": .5}
+                on_release: root.open_color_picker()
+                md_bg_color: "white"
+                text_color:"black"
+
+
+        MDBoxLayout:
+            MDRaisedButton:
+                id: Edit_note
+                text: "Edit note"
+                on_press: root.edit_note()
+            MDIconButton:
+                id: BackMain
+                icon: "home"
+                on_press: root.parent.current = "MainScreen"
+```
+
+python file:
+```.py
+class EditingScreen(MDScreen):
+    def on_pre_enter(self):#Runs if the page is opened.
+        query = f"""SELECT * from note WHERE id = {SaveMyData.editnote}"""
+        #note-ID is saved, so use that to find the data of notes.
+        db = database_handler()
+        notes = db.get_info(query)
+        notes = list(notes[0])#I hate tuple.
+        self.ids.title.text = notes[4]
+        #Change the text to be automatically filled.
+        self.ids[notes[2]].active = True
+        #Let category automatically filled as well.
+        self.ids.description.text = notes[5]
+        #change the text to be automatically filled.
+
+    def edit_note(self):#Run if edit_note button is pressed.
+        id = SaveMyData.editnote
+        category= SaveMyData.categories
+        due_date= strtodate(SaveMyData.date)
+        title=self.ids.title.text
+        description=self.ids.description.text
+        color=SaveMyData.color
+        #Get id, category, due-date, title, description and color from kivy and Saved data.
+        db = database_handler()
+        db.edit_note(id, category, due_date, title, description, color)
+        #Run edit_note program
+        db.close()
+        self.parent.current = "MainScreen"
+        #Change the screen to Mainscreen
+
+    def on_checkbox_active(self, s):
+        SaveMyData.categories = s
+        #If the checkbox pressed, save it to SaveMyData,
+
+    def show_date_picker(self):
+        query = f"""SELECT due_date from note WHERE id = {SaveMyData.editnote}"""
+        db = database_handler()
+        notes = db.get_info(query)
+        notes = list(notes[0])[0]
+        #Get the date that is originally picked.
+        db.close()
+        date_dialog = MDDatePicker(year=int(notes[:4]), month=int(notes[4:6]), day=int(notes[6:]))
+        #Show the date picker and chose the original setting data.
+        date_dialog.bind(on_save=self.on_save, on_cancel=self.on_cancel)
+        date_dialog.open()
+        #Open the date picker.
+
+    def on_save(self, instance, value, date_range):
+        SaveMyData.date = value
+        return #Run program if date is picked, and save it to Savemydata class.
+
+    def on_cancel(self, instance, value):
+        return
+
+    def open_color_picker(self):
+        query = f"""SELECT color from note WHERE id = {SaveMyData.editnote}"""
+        db = database_handler()
+        notes = db.get_info(query)
+        notes = list(notes[0])[0]
+        db.close()
+        #Get the color that is originally chosed.
+        color_picker = MDColorPicker(size_hint=(0.45, 0.85), default_color=hex_to_rgba(notes))
+        #Open the color picker and choose the original color.
+        color_picker.open()
+        color_picker.bind(
+            on_select_color=self.on_select_color,
+            on_release=self.get_selected_color,
+        )
+        #Run select_color and release program when color is selected.
+
+    def update_color(self, color: list) -> None:
+        self.ids.toolbar.text_color = rgba_to_hex(color)
+        SaveMyData.color = rgba_to_hex(color)
+        #Run if color is pressed, and save color data to Savemydata class with hex type
+
+    def get_selected_color(self,instance_color_picker: MDColorPicker,type_color: str,selected_color: Union):
+        self.update_color(selected_color[:-1] + [1])
+        #Change the color to the color that is pressed.
+
+    def on_select_color(self, instance_gradient_tab, color: list) -> None:
+        '''Called when a gradient image is clicked.'''
+```
+
+
+## All Task Screen
+I made the screen to add the note, but there is no button of icon to go to that page.
+So, I will make the screen to show all of the tasks that I added, and let it move to the editing screen the task is clicked.
+Also, I will let able to show particular category.
+kivy file:
+```.py
+<AllTaskScreen>:
+    FitImage:
+        source: "シンプルもやもや背景12-1.png"
+    MDBoxLayout:
+        size_hint:.6, .8
+        pos_hint: {"center_x":.5, "center_y":.5}
+        orientation: "horizontal"
+        md_bg_color: "#ffffff"
+        MDIconButton:
+            id:Save
+            icon: "delete"
+            on_press: root.save()
+        MDIconButton:
+            id:Add_note
+            icon: "pencil-plus"
+            on_press: root.parent.current = "NoteAddingScreen"
+        MDIconButton:
+            id: BackMain
+            text: ""
+            icon: "home"
+            on_press: root.parent.current = "MainScreen"
+
+    MDBoxLayout:
+        size_hint:.6, .6
+        pos_hint: {"center_x":.5, "center_y":.5}
+        MDCheckbox:
+            id: Everything
+            group: 'options'
+            size_hint_y: None
+            active: False
+            on_active: root.on_checkbox_active("*")
+        MDLabel:
+            size_hint_y: None
+            size_hint_x: .4
+            text:"All"
+            font_size:dp(13)
+        MDCheckbox:
+            id: Homework
+            group: 'options'
+            size_hint_y: None
+            active: False
+            on_active: root.on_checkbox_active("Homework")
+        MDLabel:
+            size_hint_y: None
+            size_hint_x: 1.55
+            text:"Homework"
+            font_size:dp(13)
+        MDCheckbox:
+            id: CAS
+            group: 'options'
+            size_hint_y: None
+            active: False
+            on_active: root.on_checkbox_active("CAS")
+        MDLabel:
+            size_hint_y: None
+            text:"CAS"
+            font_size:dp(13)
+            size_hint_x: .6
+        MDCheckbox:
+            id: Photo
+            group: 'options'
+            size_hint_y: None
+            active: False
+            on_active: root.on_checkbox_active("Photo")
+        MDLabel:
+            size_hint_y: None
+            text:"Photo"
+            font_size:dp(13)
+            size_hint_x: .85
+        MDCheckbox:
+            id: Work
+            group: 'options'
+            size_hint_y: None
+            active: False
+            on_active: root.on_checkbox_active("Work")
+        MDLabel:
+            size_hint_y: None
+            text:"Work"
+            font_size:dp(13)
+            size_hint_x: .8
+        MDCheckbox:
+            id: Others
+            group: 'options'
+            size_hint_y: None
+            active: False
+            on_active: root.on_checkbox_active("Others")
+        MDLabel:
+            size_hint_y: None
+            text:"Others"
+            font_size:dp(15)
+            size_hint_x: 1.2
+```
+
+python file:
+```.py
+class EditingScreen(MDScreen):
+    def on_pre_enter(self):#Runs if the page is opened.
+        query = f"""SELECT * from note WHERE id = {SaveMyData.editnote}"""
+        #note-ID is saved, so use that to find the data of notes.
+        db = database_handler()
+        notes = db.get_info(query)
+        notes = list(notes[0])#I hate tuple.
+        self.ids.title.text = notes[4]
+        #Change the text to be automatically filled.
+        self.ids[notes[2]].active = True
+        #Let category automatically filled as well.
+        self.ids.description.text = notes[5]
+        #change the text to be automatically filled.
+
+    def edit_note(self):#Run if edit_note button is pressed.
+        id = SaveMyData.editnote
+        category= SaveMyData.categories
+        due_date= strtodate(SaveMyData.date)
+        title=self.ids.title.text
+        description=self.ids.description.text
+        color=SaveMyData.color
+        #Get id, category, due-date, title, description and color from kivy and Saved data.
+        db = database_handler()
+        db.edit_note(id, category, due_date, title, description, color)
+        #Run edit_note program
+        db.close()
+        self.parent.current = "MainScreen"
+        #Change the screen to Mainscreen
+
+    def on_checkbox_active(self, s):
+        SaveMyData.categories = s
+        #If the checkbox pressed, save it to SaveMyData,
+
+    def show_date_picker(self):
+        query = f"""SELECT due_date from note WHERE id = {SaveMyData.editnote}"""
+        db = database_handler()
+        notes = db.get_info(query)
+        notes = list(notes[0])[0]
+        #Get the date that is originally picked.
+        db.close()
+        date_dialog = MDDatePicker(year=int(notes[:4]), month=int(notes[4:6]), day=int(notes[6:]))
+        #Show the date picker and chose the original setting data.
+        date_dialog.bind(on_save=self.on_save, on_cancel=self.on_cancel)
+        date_dialog.open()
+        #Open the date picker.
+
+    def on_save(self, instance, value, date_range):
+        SaveMyData.date = value
+        return #Run program if date is picked, and save it to Savemydata class.
+
+    def on_cancel(self, instance, value):
+        return
+
+    def open_color_picker(self):
+        query = f"""SELECT color from note WHERE id = {SaveMyData.editnote}"""
+        db = database_handler()
+        notes = db.get_info(query)
+        notes = list(notes[0])[0]
+        db.close()
+        #Get the color that is originally chosed.
+        color_picker = MDColorPicker(size_hint=(0.45, 0.85), default_color=hex_to_rgba(notes))
+        #Open the color picker and choose the original color.
+        color_picker.open()
+        color_picker.bind(
+            on_select_color=self.on_select_color,
+            on_release=self.get_selected_color,
+        )
+        #Run select_color and release program when color is selected.
+
+    def update_color(self, color: list) -> None:
+        self.ids.toolbar.text_color = rgba_to_hex(color)
+        SaveMyData.color = rgba_to_hex(color)
+        #Run if color is pressed, and save color data to Savemydata class with hex type
+
+    def get_selected_color(self,instance_color_picker: MDColorPicker,type_color: str,selected_color: Union):
+        self.update_color(selected_color[:-1] + [1])
+        #Change the color to the color that is pressed.
+
+    def on_select_color(self, instance_gradient_tab, color: list) -> None:
+        '''Called when a gradient image is clicked.'''
+```
+
+This is the end of the code explain. I will paste all of the code that I wrote, so use it if you want to move it in your computer.
 
 
 # Criteria D: Functionality 
 Video link
+
+
+# Ex: All codes
+python file: main.py
+```.py
+import sqlite3
+from kivymd.uix.screen import MDScreen
+from kivymd.app import MDApp
+import datetime
+import hashlib
+from kivymd.uix.pickers import MDDatePicker
+from kivymd.uix.pickers import MDColorPicker
+from typing import Union
+from kivymd.uix.datatables import MDDataTable
+
+
+
+
+def hash(message):
+    return hashlib.md5(message.encode("utf-8")).hexdigest()
+    #This is different way to hash with class, but it is still hash.
+
+def nowtime():#return time now with yyyymmdd structure.
+    dt = datetime.datetime.now()
+    if dt.month < 10:
+        month = f"0{dt.month}"
+    else:
+        month = dt.month
+    if dt.day < 10:
+        day = f"0{dt.day}"
+    else:
+        day = dt.day
+    out = f"{dt.year}{month}{day}"
+    return out
+
+def strtodate(s:str):#Change the date data type yyyy-mm-dd (string type) to yyyymmdd (integer type)
+    s = str(s).replace("-", "")
+    return s
+
+def datetostr(s):#Change the date data type yyyymmdd (int type) to yyyy-mm-dd (str type)
+    s = str(s)
+    return f"{s[:4]}-{s[4:6]}-{s[6:]}"
+
+def rgba_to_hex(rgba):#Change the color data type [(rational number below 1), (number //), (num //), (1)] (RGBA) to #FFFFFF(#hexadecimal).
+    rgb = rgba[:3]
+    return '#{:02X}{:02X}{:02X}'.format(*[int(x*255) for x in rgb])
+
+def hex_to_rgba(hex_color, alpha=1.0):#Change the color data type #FFFFFF(#hexadecimal) to [(rational number below 1), (number //), (num //), (1)] (RGBA).
+    hex_color = hex_color.lstrip('#')
+    rgb = tuple(int(hex_color[i:i + 2], 16)/255 for i in (0, 2, 4))
+    return rgb + (alpha,)
+
+class SaveMyData:
+    #This class is used to save data used for one single login.
+    #Data will be reseted every time restarting the program.
+    id = 0
+    note = [0, 0, 0, 0, 0, 0, 0, 0]
+    editnote = 0
+    due = ">="
+    order = "ASC"
+    date = "2023-12-12"
+    categories = "Homework"
+    color = "#FFFFFF"
+    allcategory="*"
+
+class database_handler():
+    def __init__(self):
+        self.connection = sqlite3.connect("project3.db")
+        #Becasuse we will use only one database, database is automatically setted if you start this class.
+        self.cursor = self.connection.cursor()
+        #Make cursor
+
+    def run_query(self, query):
+        self.cursor.execute(query)
+        self.connection.commit()
+        #This will run query. This is used
+
+    def close(self):
+        self.connection.close()
+
+    def create_tables(self):#This program is used for only first time to make connection and make database.
+        query = f"""CREATE TABLE if not exists users(
+            id INTEGER PRIMARY KEY,
+            email text NOT NULL,
+            password text NOT NULL,
+            username text NOT NULL
+        );"""
+        self.run_query(query)
+
+    def create_note(self):#This program is used for only first time to make connection and make database.
+        query = f"""CREATE TABLE if NOT exists note(
+            id INTEGER PRIMARY KEY,
+            user_id INTEGER not NULL,
+            category TEXT not NULL,
+            due_date TEXT not NULL,
+            title TEXT not NULL,
+            description TEXT not NULL
+            color text DEFAULT '#FFFFFF'
+        );"""
+        self.run_query(query)
+
+    def register(self, username, email, password):
+        query = f"""INSERT INTO users(email, password, username) VALUES('{email}', '{hash(password)}', '{username}');"""
+        #Add account into database 'users'
+        self.run_query(query)
+        self.close()
+
+    def login(self, email, password):
+        query = f"""SELECT id from users WHERE email = '{email}' and password = '{hash(password)}'"""
+        if self.get_info(query) is None:#Search there is pair of email and hashed password in the users database.
+            return None
+        else:
+            #If there is data, return the user-id.
+            id = self.get_info(query)
+            return list(id[0])[0]
+            #The data is sended with list that contains tuple, so it is making data to one number.
+
+    def add_note(self, user_id, category, due_date, title, description, color):
+        query = f"""INSERT INTO note(user_id, category, due_date, title, description, color) VALUES ('{user_id}', '{category}', '{due_date}', '{title}', '{description}', '{color}')"""
+        #This program will add the task to database note
+        self.run_query(query)
+        self.close()
+
+    def edit_note(self, id, category, due_date, title, description, color):
+        query = f"""UPDATE note SET category='{category}', due_date='{due_date}', title='{title}', description='{description}', color='{color}' WHERE id = '{id}'"""
+        #This program will edit the note that id is given.
+        self.run_query(query)
+        self.close()
+
+    def get_info(self, query):
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
+        #Return all of imformation that satisify query conditions from database.
+
+class LoginScreen(MDScreen):
+    def try_login(self):#This programs runs if you press button.
+        email_entered = self.ids.email_in.text#Get the email.
+        email_entered = email_entered.replace(" ", "")
+        #Because space bar is automatically entered if it's change to english setting, delete all spaces.
+        password_enterd = self.ids.password_in.text
+        if database_handler().login(email=email_entered, password=password_enterd) is None:
+            #find if there is user data in database(user)
+            print(f"Incorrect email or password. Please try it again.")
+        else:
+            print("Login Success!!")
+            SaveMyData.id = database_handler().login(email=email_entered, password=password_enterd)
+            #Save the user-id to the class, becasue we will use this so many times after log in.
+            self.parent.current = "MainScreen"
+            #Go to main screen.
+
+class RegistrationScreen(MDScreen):
+    def try_register(self):
+        email = self.ids.email_in.text
+        username = self.ids.uname.text
+        password = self.ids.passwd.text
+        #get email, username, password from application
+        if password == self.ids.password_check.text:
+            #Check password entered is same as second password enterd.
+            query = f"""SELECT id FROM users WHERE email = '{email}'"""
+            if database_handler().get_info(query) == []:
+                #Check there is no same account in the users database.
+                database_handler().register(username=username, email=email, password=password)
+                #Add the user to database
+                print("Register success!")
+                self.parent.current = "MainScreen"
+                #Go to mainscreen
+                SaveMyData.id = database_handler().login(email=email, password=password)
+                #Save userid because it will use a lot after that.
+            else:
+                print("This email is already used")
+        else:
+            print("error. Password and password check is not same")
+        database_handler().close()
+
+class MainScreen(MDScreen):
+    def on_pre_enter(self, *args):
+        query = f"""SELECT title, due_date from note WHERE due_date >= {nowtime()} and user_id = {SaveMyData.id}"""
+        db = database_handler()
+        db.cursor.execute(query)
+        data = db.cursor.fetchone()
+        # Find the "one" task that due date is not passed yet and most resent due date.
+        if data is None:
+            s = ["---", "---"]
+        else:
+            s = list(data)
+            #Let it list because I hate turple.
+        db.close()
+        self.ids.ResentTask.text = f"The most resent task is '{s[0]}'"
+        self.ids.DueTask.text = f"Deadline:{datetostr(s[1])}"
+        #Change the text in kivy to see the task easelly.
+
+class EditingScreen(MDScreen):
+    def on_pre_enter(self):#Runs if the page is opened.
+        query = f"""SELECT * from note WHERE id = {SaveMyData.editnote}"""
+        #note-ID is saved, so use that to find the data of notes.
+        db = database_handler()
+        notes = db.get_info(query)
+        notes = list(notes[0])#I hate tuple.
+        self.ids.title.text = notes[4]
+        #Change the text to be automatically filled.
+        self.ids[notes[2]].active = True
+        #Let category automatically filled as well.
+        self.ids.description.text = notes[5]
+        #change the text to be automatically filled.
+
+    def edit_note(self):#Run if edit_note button is pressed.
+        id = SaveMyData.editnote
+        category= SaveMyData.categories
+        due_date= strtodate(SaveMyData.date)
+        title=self.ids.title.text
+        description=self.ids.description.text
+        color=SaveMyData.color
+        #Get id, category, due-date, title, description and color from kivy and Saved data.
+        db = database_handler()
+        db.edit_note(id, category, due_date, title, description, color)
+        #Run edit_note program
+        db.close()
+        self.parent.current = "MainScreen"
+        #Change the screen to Mainscreen
+
+    def on_checkbox_active(self, s):
+        SaveMyData.categories = s
+        #If the checkbox pressed, save it to SaveMyData,
+
+    def show_date_picker(self):
+        query = f"""SELECT due_date from note WHERE id = {SaveMyData.editnote}"""
+        db = database_handler()
+        notes = db.get_info(query)
+        notes = list(notes[0])[0]
+        #Get the date that is originally picked.
+        db.close()
+        date_dialog = MDDatePicker(year=int(notes[:4]), month=int(notes[4:6]), day=int(notes[6:]))
+        #Show the date picker and chose the original setting data.
+        date_dialog.bind(on_save=self.on_save, on_cancel=self.on_cancel)
+        date_dialog.open()
+        #Open the date picker.
+
+    def on_save(self, instance, value, date_range):
+        SaveMyData.date = value
+        return #Run program if date is picked, and save it to Savemydata class.
+
+    def on_cancel(self, instance, value):
+        return
+
+    def open_color_picker(self):
+        query = f"""SELECT color from note WHERE id = {SaveMyData.editnote}"""
+        db = database_handler()
+        notes = db.get_info(query)
+        notes = list(notes[0])[0]
+        db.close()
+        #Get the color that is originally chosed.
+        color_picker = MDColorPicker(size_hint=(0.45, 0.85), default_color=hex_to_rgba(notes))
+        #Open the color picker and choose the original color.
+        color_picker.open()
+        color_picker.bind(
+            on_select_color=self.on_select_color,
+            on_release=self.get_selected_color,
+        )
+        #Run select_color and release program when color is selected.
+
+    def update_color(self, color: list) -> None:
+        self.ids.toolbar.text_color = rgba_to_hex(color)
+        SaveMyData.color = rgba_to_hex(color)
+        #Run if color is pressed, and save color data to Savemydata class with hex type
+
+    def get_selected_color(self,instance_color_picker: MDColorPicker,type_color: str,selected_color: Union):
+        self.update_color(selected_color[:-1] + [1])
+        #Change the color to the color that is pressed.
+
+    def on_select_color(self, instance_gradient_tab, color: list) -> None:
+        '''Called when a gradient image is clicked.'''
+
+class NoteAddingScreen(MDScreen):
+    def on_pre_enter(self):
+        self.ids.title.text = ""
+        self.ids.description.text = ""
+        #Set all of the data empty.
+
+    def on_checkbox_active(self, s):
+        SaveMyData.categories = s
+        #Run if the category is picked, and save it to the SaveMyData class.
+
+    def addNote(self):#run if addnote button is pressed.
+        title = self.ids.title.text
+        category = SaveMyData.categories
+        description = self.ids.description.text
+        due_date = strtodate(SaveMyData.date)#Change the text type of the date to string to integer. That will make database easyer to find which date is faster.
+        color = SaveMyData.color
+        id = SaveMyData.id
+        #Get title, category, description, due_date. color, id from kivy and saved data.
+        if title != "" and description != "":#Check if there is no empty space
+            database_handler().add_note(title=title, category=category, description=description, due_date=due_date, user_id=id, color=color)
+            print("Adding note success!")
+            #add the note with using the data we got.
+            self.parent.current = "MainScreen"
+            #Change the screen to mainscreen.
+        else:
+            print("Some parts is empty")
+
+    def show_date_picker(self):
+        date_dialog = MDDatePicker()
+        date_dialog.bind(on_save=self.on_save, on_cancel=self.on_cancel)
+        date_dialog.open()
+        #Open date picker. Original date setting is date of now.
+
+    def on_save(self, instance, value, date_range):
+        SaveMyData.date = value
+        return
+        #Run if the date is picked. Save it into Savemydata class.
+
+    def on_cancel(self, instance, value):
+        return
+
+    def open_color_picker(self):
+        color_picker = MDColorPicker(size_hint=(0.45, 0.85))
+        color_picker.open()
+        color_picker.bind(
+            on_select_color=self.on_select_color,
+            on_release=self.get_selected_color,
+        )
+        #open color picker, with original color blue.
+        #This program runs the very first time you open this page.
+
+    def update_color(self, color: list) -> None:
+        self.ids.toolbar.text_color = color
+        SaveMyData.color = rgba_to_hex(color)
+        #Runs if color is picked
+        #save color, and change the cokor in the button.
+        #make sure that data saved is im hex every time.
+
+    def get_selected_color(self,instance_color_picker:MDColorPicker,type_color:str,selected_color: Union):
+        self.update_color(selected_color[:-1] + [1])
+        #If color is selected, run the program to update color.
+
+    def on_select_color(self, instance_gradient_tab, color: list) -> None:
+        '''Called when a gradient image is clicked.'''
+
+class AllTaskScreen(MDScreen):
+    data_table = None
+    def on_pre_enter(self, *args):
+        #This will make the data table that has title, due date and category.
+        self.data_table = MDDataTable(
+            size_hint=(.6, .6),
+            pos_hint={"center_x":.5, "center_y":.6},
+            use_pagination=False,
+            check=True,
+            column_data=[
+                        ("title", 75),
+                        ("due date", 50),
+                        ("category", 50)],
+            background_color_selected_cell="e4514f",
+        )
+
+        self.data_table.bind(on_row_press=self.row_press)#run row_press() if it prressed
+        self.data_table.bind(on_check_press=self.check_press)#run check_press if the check box pressed
+        self.add_widget(self.data_table)
+
+
+    def row_press(self, table, row):
+        num = row.index//3#Get the index of the pressed row. devide 3 becasue there is 3 coloms(title, due date, category
+        db = database_handler()
+        if SaveMyData.allcategory == "*":#Somehow * is not working in database, so I sepereated each row.
+            query = f"""SELECT id from note where user_id = {SaveMyData.id} order by due_date ASC"""
+        else:
+            query = f"""SELECT id from note where (user_id = {SaveMyData.id} and category = '{SaveMyData.allcategory}') order by due_date ASC"""
+        #This will get the row that is showed in the screen.
+        ids = db.get_info(query)
+        SaveMyData.editnote = list(ids[num])[0]
+        #Get the num's id so able to get note-id information. Also, save it Savemydata that you can use in other screen.
+        self.parent.current = "EditingScreen"
+        #Go to editingscreen.
+
+    def check_press(self, current_row, rows):
+        return
+
+    def save(self):
+        check_row = self.data_table.get_row_checks()#Get all boxes that is checked.
+        db = database_handler()
+        for r in check_row:
+            id = r[0]#Get id from check_row
+            query = f"""DELETE from note where id = {id}"""#Delete all of data that is checked.
+            db.run_query(query)
+        db.close()
+        self.update()#Update the page and make sure it is deleted.
+
+    def update(self):
+        db = database_handler()
+        if SaveMyData.allcategory == "*":#"*" mark was not abailable to use in sql, so use if statement.
+            query = f"""SELECT title, due_date, category, color from note where user_id = {SaveMyData.id} order by due_date ASC"""
+        else:
+            query = f"""SELECT title, due_date, category, color from note where (user_id = {SaveMyData.id} and category = '{SaveMyData.allcategory}') order by due_date ASC"""
+        #Get all of the data of category chosen and made by particular user from the date descent order.
+        data = db.get_info(query)
+        db.close()
+        out = []
+        for i in data:
+            i = list(i)#Let data to list type because I hate turple
+            i[1] = datetostr(i[1])
+            for j in range(len(i)-1):
+                i[j] = f"[color={i[3]}]{i[j]}[/color]"#Change color of the text here.
+            i.pop(3)#I don't need color data any more.
+            i = tuple(i)
+            out.append(i)#remove list data to tuple type.
+        self.data_table.update_row_data(None, out)#update with using colored data.
+
+    def on_checkbox_active(self, info):#Active when category is picked.
+        SaveMyData.allcategory = info#save data into SaveMyData
+        self.update()#Update. everytime.
+
+class main(MDApp):#code will run with this class.
+    def built(self):
+        return
+
+
+test = main()
+#Run main program to start showing the program.
+test.run()
+```
+
+kivy file: main.kv
+```.py
+ScreenManager:
+    LoginScreen:
+        name: "LoginScreen"
+    RegistrationScreen:
+        name: "RegistrationScreen"
+    MainScreen:
+        name: "MainScreen"
+    EditingScreen:
+        name: "EditingScreen"
+    NoteAddingScreen:
+        name: "NoteAddingScreen"
+    AllTaskScreen:
+        name: "AllTaskScreen"
+
+<LoginScreen>:
+    FitImage:
+        source: "シンプルもやもや背景12-1.png"#background image
+    MDCard:
+        size_hint:.6, .8
+        #Main parts will be smaller than full screen.
+        pos_hint: {"center_x":.5, "center_y":.5}
+        orientation: "vertical"
+
+        MDLabel:
+        #Text to show how to login.
+            size_hint:1, .1
+            font_style:"H2"
+            text:"Login"
+            halign:"center"
+
+        MDTextField:
+        #Input the data to get email
+            id:email_in
+            hint_text:"enter email"
+            size_hint_x: .8
+            pos_hint:{"center_x":.5}
+            icon_left: 'email-outline'
+
+        MDTextField:
+        #Input the data to get password
+            id:password_in
+            hint_text:"enter password"
+            password: True
+            size_hint_x: .8
+            pos_hint:{"center_x":.5}
+            icon_left: "lock"
+
+        MDBoxLayout:
+            MDRaisedButton:
+            #Start the program if you press this button.
+                id: login
+                text:"Login"
+                md_bg_color: "#a8dadc"
+                on_press:root.try_login()
+                #If you press, try_login() in python file will be active.
+                size_hint:.5, .1
+
+            MDRaisedButton:#Go to register screen if you don't have account yet.
+                text: "Register"
+                md_bg_color: "#90ee90"
+                on_press:root.parent.current = "RegistrationScreen"
+                #Move the page to RegistrationScreen.
+                size_hint:.5, .1
+
+
+<RegistrationScreen>:
+    FitImage:
+        source: "シンプルもやもや背景12-1.png"#background
+    MDCard:
+        size_hint:.6, .8
+        pos_hint: {"center_x":.5, "center_y":.5}
+        orientation: "vertical"
+
+        MDLabel:
+            size_hint:1, .1
+            font_style:"H2"
+            text:"Register"
+            halign:"center"
+
+        MDTextField:
+            id:uname
+            hint_text:"enter username"
+            size_hint_x: .8
+            pos_hint:{"center_x":.5}
+            icon_left: "rename"
+
+        MDTextField:
+            id:email_in
+            hint_text:"enter email"
+            size_hint_x: .8
+            pos_hint:{"center_x":.5}
+            icon_left: 'email-outline'
+
+        MDTextField:
+            id:passwd
+            hint_text:"enter password"
+            password: True
+            size_hint_x: .8
+            pos_hint:{"center_x":.5}
+            error: False
+            icon_left: 'lock'
+
+        MDTextField:
+            id:password_check
+            hint_text:"enter password_check"
+            password: True
+            size_hint_x: .8
+            pos_hint:{"center_x":.5}
+            error:False
+            icon_left: 'lock-check'
+
+        MDBoxLayout:
+            MDRaisedButton:
+                id: login
+                text:"Login"
+                md_bg_color: "#a8dadc"
+                on_press:root.parent.current = "LoginScreen"
+                size_hint:.5, .1
+
+            MDRaisedButton:
+                text: "Register"
+                md_bg_color: "#90ee90"
+                on_press:root.try_register()
+                size_hint:.5, .1
+
+<MainScreen>:
+    FitImage:
+        source: "シンプルもやもや背景12-1.png"
+    MDCard:
+        id: main_box
+        size_hint:.6, .8
+        pos_hint: {"center_x":.5, "center_y":.5}
+        orientation: "vertical"
+        MDLabel:
+            text:"Welcome to Task application!"
+            font_style:"H2"
+        MDBoxLayout:
+            orientation:"vertical"
+            MDLabel:
+                id: ResentTask
+                text: ""
+                font_style: "H2"
+            MDLabel:
+                id: DueTask
+                text: ""
+        MDBoxLayout:
+            orientation: "horizontal"
+            MDIconButton:
+                id:Add_note
+                icon: "pencil-plus"
+                on_press: root.parent.current = "NoteAddingScreen"
+            MDIconButton:
+                id:Logout
+                icon: "logout"
+                on_press: root.parent.current = "LoginScreen"
+            MDIconButton:
+                id:All_task
+                icon: "reorder-horizontal"
+                on_press: root.parent.current = "AllTaskScreen"
+
+
+
+<EditingScreen>:
+    FitImage:
+        source: "シンプルもやもや背景12-1.png"
+    MDCard:
+        size_hint:.6, .8
+        pos_hint: {"center_x":.5, "center_y":.5}
+        orientation: "vertical"
+        MDLabel:
+            size_hint:1, .1
+            font_style:"H2"
+            text:"Edit"
+            halign:"center"
+        MDBoxLayout:
+            orientation: "vertical"
+            MDTextField:
+                id: title
+                hint_text:"enter title here"
+            MDTextField:
+                id: description
+                hint_text:"enter description here"
+
+        MDBoxLayout:
+            orientation:"vertical"
+            MDLabel:
+                text: 'Categories:'
+                pos_hint: {"center_x":.5, "center_y":.5}
+            MDBoxLayout:
+                MDCheckbox:
+                    id: Homework
+                    group: 'options'
+                    size_hint_y: None
+                    active: False
+                    on_active: root.on_checkbox_active("Homework")
+                MDLabel:
+                    size_hint_y: None
+                    text:"Homework"
+                    size_hint_x: 1.8
+
+                MDCheckbox:
+                    id: CAS
+                    group: 'options'
+                    size_hint_y: None
+                    active: False
+                    on_active: root.on_checkbox_active("CAS")
+                MDLabel:
+                    size_hint_y: None
+                    text:"CAS"
+                MDCheckbox:
+                    id: Photo
+                    group: 'options'
+                    size_hint_y: None
+                    active: False
+                    on_active: root.on_checkbox_active("Photo")
+                MDLabel:
+                    size_hint_y: None
+                    text:"Photo"
+                MDCheckbox:
+                    id: Work
+                    group: 'options'
+                    size_hint_y: None
+                    active: False
+                    on_active: root.on_checkbox_active("Work")
+                MDLabel:
+                    size_hint_y: None
+                    text:"Work"
+                MDCheckbox:
+                    id: Others
+                    group: 'options'
+                    size_hint_y: None
+                    active: False
+                    on_active: root.on_checkbox_active("Others")
+                MDLabel:
+                    size_hint_y: None
+                    text:"Others"
+
+
+        MDBoxLayout:
+            MDRoundFlatButton:
+                id: date
+                text: "Open date picker"
+                pos_hint: {'center_x': .5, 'center_y': .5}
+                on_release: root.show_date_picker()
+                md_bg_color:"orange"
+            MDRoundFlatButton:
+                id: toolbar
+                text: "Customize color"
+                pos_hint: {"center_x": .5, "center_y": .5}
+                on_release: root.open_color_picker()
+                md_bg_color: "white"
+                text_color:"black"
+
+
+        MDBoxLayout:
+            MDRaisedButton:
+                id: Edit_note
+                text: "Edit note"
+                on_press: root.edit_note()
+            MDIconButton:
+                id: BackMain
+                icon: "home"
+                on_press: root.parent.current = "MainScreen"
+
+<NoteAddingScreen>:
+    FitImage:
+        source: "シンプルもやもや背景12-1.png"
+    MDCard:
+        size_hint:.6, .8
+        pos_hint: {"center_x":.5, "center_y":.5}
+        orientation: "vertical"
+        MDBoxLayout:
+            test:""
+            font_style:"H2"
+        MDBoxLayout:
+            orientation: "vertical"
+            spacing: dp(20)
+            MDLabel:
+                size_hint:1, .1
+                font_style:"H2"
+                text:"Add note"
+                halign:"center"
+            MDTextField:
+                id: title
+                hint_text:"enter title here"
+            MDTextField:
+                id: description
+                hint_text:"enter description here"
+
+        MDBoxLayout:
+            orientation:"vertical"
+            spacing: dp(20)
+            MDLabel:
+                text: 'Categories:'
+            MDBoxLayout:
+                MDCheckbox:
+                    id: Homework
+                    group: 'options'
+                    size_hint_y: None
+                    active: True
+                    on_active: root.on_checkbox_active("Homework")
+                MDLabel:
+                    size_hint_y: None
+                    text:"Homework"
+                    size_hint_x: 1.8
+                MDCheckbox:
+                    id: CAS
+                    group: 'options'
+                    size_hint_y: None
+                    active: False
+                    on_active: root.on_checkbox_active("CAS")
+                MDLabel:
+                    size_hint_y: None
+                    text:"CAS"
+                MDCheckbox:
+                    id: Photo
+                    group: 'options'
+                    size_hint_y: None
+                    active: False
+                    on_active: root.on_checkbox_active("Photo")
+                MDLabel:
+                    size_hint_y: None
+                    text:"Photo"
+                MDCheckbox:
+                    id: Work
+                    group: 'options'
+                    size_hint_y: None
+                    active: False
+                    on_active: root.on_checkbox_active("Work")
+                MDLabel:
+                    size_hint_y: None
+                    text:"Work"
+                MDCheckbox:
+                    id: Others
+                    group: 'options'
+                    size_hint_y: None
+                    active: False
+                    on_active: root.on_checkbox_active("Others")
+                MDLabel:
+                    size_hint_y: None
+                    text:"Other"
+                    size_hint_x: 1.2
+        MDBoxLayout:
+            MDRoundFlatButton:
+                id: date
+                text: "Open date picker"
+                pos_hint: {'center_x': .5, 'center_y': .5}
+                on_release: root.show_date_picker()
+                md_bg_color:"orange"
+            MDRoundFlatButton:
+                id: toolbar
+                text: "Customize color"
+                pos_hint: {"center_x": .5, "center_y": .5}
+                on_release: root.open_color_picker()
+                md_bg_color: "FF0000"
+                text_color: "black"
+
+
+        MDBoxLayout:
+
+            MDIconButton:
+                id:Add_note
+                icon: "pencil-plus"
+                on_press: root.addNote()
+            MDIconButton:
+                id: BackMain
+                icon: "home"
+                on_press: root.parent.current = "MainScreen"
+
+<AllTaskScreen>:
+    FitImage:
+        source: "シンプルもやもや背景12-1.png"
+    MDBoxLayout:
+        size_hint:.6, .8
+        pos_hint: {"center_x":.5, "center_y":.5}
+        orientation: "horizontal"
+        md_bg_color: "#ffffff"
+        MDIconButton:
+            id:Save
+            icon: "delete"
+            on_press: root.save()
+        MDIconButton:
+            id:Add_note
+            icon: "pencil-plus"
+            on_press: root.parent.current = "NoteAddingScreen"
+        MDIconButton:
+            id: BackMain
+            text: ""
+            icon: "home"
+            on_press: root.parent.current = "MainScreen"
+
+    MDBoxLayout:
+        size_hint:.6, .6
+        pos_hint: {"center_x":.5, "center_y":.5}
+        MDCheckbox:
+            id: Everything
+            group: 'options'
+            size_hint_y: None
+            active: False
+            on_active: root.on_checkbox_active("*")
+        MDLabel:
+            size_hint_y: None
+            size_hint_x: .4
+            text:"All"
+            font_size:dp(13)
+        MDCheckbox:
+            id: Homework
+            group: 'options'
+            size_hint_y: None
+            active: False
+            on_active: root.on_checkbox_active("Homework")
+        MDLabel:
+            size_hint_y: None
+            size_hint_x: 1.55
+            text:"Homework"
+            font_size:dp(13)
+        MDCheckbox:
+            id: CAS
+            group: 'options'
+            size_hint_y: None
+            active: False
+            on_active: root.on_checkbox_active("CAS")
+        MDLabel:
+            size_hint_y: None
+            text:"CAS"
+            font_size:dp(13)
+            size_hint_x: .6
+        MDCheckbox:
+            id: Photo
+            group: 'options'
+            size_hint_y: None
+            active: False
+            on_active: root.on_checkbox_active("Photo")
+        MDLabel:
+            size_hint_y: None
+            text:"Photo"
+            font_size:dp(13)
+            size_hint_x: .85
+        MDCheckbox:
+            id: Work
+            group: 'options'
+            size_hint_y: None
+            active: False
+            on_active: root.on_checkbox_active("Work")
+        MDLabel:
+            size_hint_y: None
+            text:"Work"
+            font_size:dp(13)
+            size_hint_x: .8
+        MDCheckbox:
+            id: Others
+            group: 'options'
+            size_hint_y: None
+            active: False
+            on_active: root.on_checkbox_active("Others")
+        MDLabel:
+            size_hint_y: None
+            text:"Others"
+            font_size:dp(15)
+            size_hint_x: 1.2
+```
