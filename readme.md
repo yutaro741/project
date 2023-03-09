@@ -1116,6 +1116,5 @@ This is the end of the code explain.
 
 
 # Criteria D: Functionality 
-Video link
-
-
+This is the video!!!!!!!!!!!!
+https://youtu.be/z1Vku4CRHws
