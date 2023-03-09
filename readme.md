@@ -1,4 +1,4 @@
-# Project 3 Bernerd's app
+# Project 3 Mr.B's app
 
 ![](https://github.com/yutaro741/project/blob/main/photo/work1_image03%20copy.jpg)[^1]
 
@@ -7,13 +7,13 @@
 # Criteria A: Planning
 
 ## Problem definition
-Bernerd is a student studying for IB at UWC ISAK Japan. He has a lot of things to do in his life, such as Homework, CAS activity, part time job and his hobby. He is finding it is hard to manage his task for those massive amounts of tasks. So, he is willing to have an application that solves that problem. He requires the Login and Register system, which makes his girlfriend use that as well. He wants not only the parts to add tasks, but also edit the tasks to be able to cope with changing deadlines. He didn’t mention how he wants to see the tasks, but because he likes photography, he strongly wants to change the colors of the tasks, to make it easy to see.
+Mr.B is a student studying for IB at UWC ISAK Japan. He has a lot of things to do in his life, such as Homework, CAS activity, part time job and his hobby. He is finding it is hard to manage his task for those massive amounts of tasks. So, he is willing to have an application that solves that problem. He requires the Login and Register system, which makes his girlfriend use that as well. He wants not only the parts to add tasks, but also edit the tasks to be able to cope with changing deadlines. He didn’t mention how he wants to see the tasks, but because he likes photography, he strongly wants to change the colors of the tasks, to make it easy to see.
 
 
 ## Proposed Solution
 Proposed solution:
 Design Statement
-To solve my client's problem, I will create an application to manage the tasks for Bernerd. I will be using Python as the primary programming language for the application, KivyMD for the graphical user interface (GUI), and SQLite to manipulate the database in which the tasks logs will be stored. The application will consist of a login page, a registration page, main page, page to edit the task, and page to see all of the task.
+To solve my client's problem, I will create an application to manage the tasks for Mr.B. I will be using Python as the primary programming language for the application, KivyMD for the graphical user interface (GUI), and SQLite to manipulate the database in which the tasks logs will be stored. The application will consist of a login page, a registration page, main page, page to edit the task, and page to see all of the task.
 
 System
 The application to manage appliance usage will be developed on the programming editor PyCharm version 2022.3.2, run on a 2020 MacBook Pro using the OS macOS Big Sur version 13.2.1. Through PyCharm, the application will be coded using Python, KivyMD for the GUI, and SQLite to manipulate the database.
@@ -1117,3 +1117,5 @@ This is the end of the code explain.
 
 # Criteria D: Functionality 
 Video link
+
+
