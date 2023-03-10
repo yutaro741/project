@@ -40,6 +40,8 @@ I have chosen to use SQLite as the database management system for this project. 
 [^6]:“What is SQLite? And When to Use It?” Simplilearn, 16 February 2023, https://www.simplilearn.com/tutorials/sql-tutorial/what-is-sqlite. Accessed 10 March 2023.
 
 ## Success Criteria
+So, the success criteria that best fulfils his requirements are as follows.
+
 1. Login and Register system (Encrypt password)
 2. Adding journal (Name, category, due date, tag color)
 3. Be able to Edit journal
