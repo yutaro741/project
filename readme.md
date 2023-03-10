@@ -35,10 +35,10 @@ To create the graphical user interface for this project, I have decided to use K
 
 SQLite
 
-I have chosen to use SQLite as the database management system for this project. SQLite is a lightweight, embedded relational database engine that is perfect for small to medium scale projects.[^4] It's highly efficient, fast and reliable, making it a popular choice for developers. Additionally, SQLite is open source and requires no setup or administration, making it easy to integrate with any project. With its ability to handle large amounts of data and its support for SQL, SQLite provides a powerful solution for data storage and retrieval. Furthermore, SQLite is cross-platform compatible, which means that the application can run seamlessly on different operating systems such as Windows, Linux and macOS.
+I have chosen to use SQLite as the database management system for this project. SQLite is a lightweight, embedded relational database engine that is perfect for small to medium scale projects.[^4] It's highly efficient, fast and reliable, making it a popular choice for developers. Additionally, SQLite is open source and requires no setup or administration, making it easy to integrate with any project.[^5] With its ability to handle large amounts of data and its support for SQL, SQLite provides a powerful solution for data storage and retrieval. Furthermore, SQLite is cross-platform compatible, which means that the application can run seamlessly on different operating systems such as Windows, Linux and macOS.
 
 [^4]:SQLite Home Page, https://www.sqlite.org/index.html. Accessed 10 March 2023.
-
+[^5]:“What is SQLite? And When to Use It?” Simplilearn, 16 February 2023, https://www.simplilearn.com/tutorials/sql-tutorial/what-is-sqlite. Accessed 10 March 2023.
 
 ## Success Criteria
 1. Login and Register system (Encrypt password)
