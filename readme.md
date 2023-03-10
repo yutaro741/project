@@ -48,6 +48,8 @@ I have chosen to use SQLite as the database management system for this project. 
 5. Be able to delete the task finished with one button
 6. Be able to pick the date easely.
 
+## Getting approval from my cliant:
+![](https://github.com/yutaro741/project/blob/main/photo/Screen%20Shot%202023-03-10%20at%2012.54.41.png)
 
 # Criteria B: Design
 ## System Diagram
@@ -57,23 +59,26 @@ I have chosen to use SQLite as the database management system for this project. 
 ![](https://github.com/yutaro741/project/blob/main/photo/Screen%20Shot%202023-03-09%20at%201.26.56.png)
 
 ## ER diagram
-![](https://github.com/yutaro741/project/blob/main/photo/9565C84E-E414-4E24-887A-E2F0D472EADF.jpg)
+![](https://github.com/yutaro741/project/blob/main/photo/F8E60790-7FAE-4CCB-B017-7211CCA34FDD.jpg)
 
 ## Flow Diagrams
 Login system
-![](https://github.com/yutaro741/project/blob/main/photo/F343FB60-E71B-4140-94DD-82DE76A4D329.jpg)
+![](https://github.com/yutaro741/project/blob/main/photo/9A8980BA-215F-4A0C-B395-2117453787C6.jpg)
 
 Registerasion system
-![](https://github.com/yutaro741/project/blob/main/photo/CD6F0DF9-D993-485E-BC88-E8C2FA7F2901.jpg)
+![](https://github.com/yutaro741/project/blob/main/photo/C0DAC241-E312-4ED1-90E5-199889AE77EA.jpg)
 
 Add note system
-![](https://github.com/yutaro741/project/blob/main/photo/177CC81C-FD04-4678-806C-FBE31C8F4453.jpg)
+![](https://github.com/yutaro741/project/blob/main/photo/D988D10B-62AD-4778-9E53-210BEA71EECC.jpg)
 
 Edit note system
-![](https://github.com/yutaro741/project/blob/main/photo/260CF555-6A80-420A-BCBA-51ECE1080E96.jpg)
+![](https://github.com/yutaro741/project/blob/main/photo/76BFA64C-2C88-4C44-85FB-77114C365710.jpg)
 
 Show data table system
-![](https://github.com/yutaro741/project/blob/main/photo/657BF954-12FD-4CFC-908D-CC591DB00141.jpg)
+![](https://github.com/yutaro741/project/blob/main/photo/BF728A4F-D2CB-454F-A926-B4F043AA11CB.jpg)
+
+Go to edit note system
+![](https://github.com/yutaro741/project/blob/main/photo/A0C05C0B-B2EC-4F1F-8492-6A69BAA1AEDD.jpg)
 
 ## Wire frame
 ![](https://github.com/yutaro741/project/blob/main/photo/83343B53-AD3A-4DAE-A3B8-C9D37D1D7FED.jpg)
