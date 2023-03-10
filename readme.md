@@ -28,11 +28,15 @@ I have chosen to use Python as the primary programming language for several reas
 
 KivyMD
 
-I will be using KivyMD to create the graphical user interface, which is an open source library capable of creating graphical user interfaces (GUI) for applications. In this project, the GUI will act as the communication between the user, who will input commands and view information through their keyboard and computer screen, and the program, which will manipulate the database to create, add, edit and delete data. The GUI is a crucial component of this application, as it will allow the client, or anyone including those without experience in programming, to easily access the logs.
+To create the graphical user interface for this project, I have decided to use KivyMD, an open-source library that specializes in creating graphical user interfaces (GUI) for applications.[^3] The GUI will serve as the primary mode of communication between the user and the program. Through the GUI, the user can input commands and view information via their keyboard and computer screen, while the program manipulates the database to create, add, edit, and delete data. As the GUI plays a crucial role in this application, it is essential that it is easy to navigate and user-friendly. KivyMD provides a range of features that will enable me to create an intuitive and visually appealing interface. With the GUI in place, the client and any other user, even those without experience in programming, will be able to easily access the logs and interact with the program.
+
+[^3]:https://kivymd.readthedocs.io/en/latest/ Welcome to KivyMD’s documentation!
 
 SQLite
 
-I have chosen to use SQLite as the database management system for this project. SQLite is a lightweight, embedded relational database engine that is perfect for small to medium scale projects. It's highly efficient, fast and reliable, making it a popular choice for developers. Additionally, SQLite is open source and requires no setup or administration, making it easy to integrate with any project. With its ability to handle large amounts of data and its support for SQL, SQLite provides a powerful solution for data storage and retrieval. Furthermore, SQLite is cross-platform compatible, which means that the application can run seamlessly on different operating systems such as Windows, Linux and macOS.
+I have chosen to use SQLite as the database management system for this project. SQLite is a lightweight, embedded relational database engine that is perfect for small to medium scale projects.[^4] It's highly efficient, fast and reliable, making it a popular choice for developers. Additionally, SQLite is open source and requires no setup or administration, making it easy to integrate with any project. With its ability to handle large amounts of data and its support for SQL, SQLite provides a powerful solution for data storage and retrieval. Furthermore, SQLite is cross-platform compatible, which means that the application can run seamlessly on different operating systems such as Windows, Linux and macOS.
+
+[^4]:https://www.sqlite.org/index.html What is What Is SQLite?
 
 
 ## Success Criteria
