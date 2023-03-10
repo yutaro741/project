@@ -21,24 +21,23 @@ The application to manage appliance usage will be developed on the programming e
 ## Software Justification
 Python
 
-I have chosen to use Python as the primary programming language for several reasons. Firstly, Python is a high-level language that is easy to understand and write due to its simple syntax. It is ideal for beginners as it is accessible while also being practical and flexible for a variety of projects. Furthermore, Python is one of the fastest growing programming languages[^2], with a vast online community of developers who can offer resources and support. Secondly, I have extensive experience in Python, and it is my go-to language. This familiarity will save me time, enabling the project to run more efficiently than if I had to learn a new language. Finally, Python is an object-oriented programming language, which is perfect for this project. OOP frameworks are modular, making it easier to identify issues in the code, and the code can be reused through inheritance. Moreover, functions can be flexible and usable across multiple classes due to polymorphism. All of these factors make Python the best choice for this project.
+I have chosen to use Python as the primary programming language for several reasons. Firstly, Python is a high-level language that is easy to understand and write due to its simple syntax. It is ideal for beginners as it is accessible while also being practical and flexible for a variety of projects.[^2] Furthermore, Python is one of the fastest growing programming languages[^3], with a vast online community of developers who can offer resources and support. Secondly, I have extensive experience in Python, and it is my go-to language. This familiarity will save me time, enabling the project to run more efficiently than if I had to learn a new language. Finally, Python is an object-oriented programming language, which is perfect for this project. OOP frameworks are modular, making it easier to identify issues in the code, and the code can be reused through inheritance. Moreover, functions can be flexible and usable across multiple classes due to polymorphism. All of these factors make Python the best choice for this project.
 
-[^2]:“Guide: Is Python the Top Programming Language?” BairesDev, https://www.bairesdev.com/technologies/why-is-python-top-language/. Accessed 10 March 2023.
-
-
+[^2]:Welcome to Python.org, https://www.python.org/. Accessed 10 March 2023.
+[^3]:“Guide: Is Python the Top Programming Language?” BairesDev, https://www.bairesdev.com/technologies/why-is-python-top-language/. Accessed 10 March 2023.
 
 KivyMD
 
-To create the graphical user interface for this project, I have decided to use KivyMD, an open-source library that specializes in creating graphical user interfaces (GUI) for applications.[^3] The GUI will serve as the primary mode of communication between the user and the program. Through the GUI, the user can input commands and view information via their keyboard and computer screen, while the program manipulates the database to create, add, edit, and delete data. As the GUI plays a crucial role in this application, it is essential that it is easy to navigate and user-friendly. KivyMD provides a range of features that will enable me to create an intuitive and visually appealing interface. With the GUI in place, the client and any other user, even those without experience in programming, will be able to easily access the logs and interact with the program.
+To create the graphical user interface for this project, I have decided to use KivyMD, an open-source library that specializes in creating graphical user interfaces (GUI) for applications.[^4] The GUI will serve as the primary mode of communication between the user and the program. Through the GUI, the user can input commands and view information via their keyboard and computer screen, while the program manipulates the database to create, add, edit, and delete data. As the GUI plays a crucial role in this application, it is essential that it is easy to navigate and user-friendly. KivyMD provides a range of features that will enable me to create an intuitive and visually appealing interface. With the GUI in place, the client and any other user, even those without experience in programming, will be able to easily access the logs and interact with the program.
 
-[^3]:KivyMD 1.1.1 documentation, https://kivymd.readthedocs.io/en/latest/. Accessed 10 March 2023.
+[^4]:KivyMD 1.1.1 documentation, https://kivymd.readthedocs.io/en/latest/. Accessed 10 March 2023.
 
 SQLite
 
-I have chosen to use SQLite as the database management system for this project. SQLite is a lightweight, embedded relational database engine that is perfect for small to medium scale projects.[^4] It's highly efficient, fast and reliable, making it a popular choice for developers. Additionally, SQLite is open source and requires no setup or administration, making it easy to integrate with any project.[^5] With its ability to handle large amounts of data and its support for SQL, SQLite provides a powerful solution for data storage and retrieval. Furthermore, SQLite is cross-platform compatible, which means that the application can run seamlessly on different operating systems such as Windows, Linux and macOS.
+I have chosen to use SQLite as the database management system for this project. SQLite is a lightweight, embedded relational database engine that is perfect for small to medium scale projects.[^5] It's highly efficient, fast and reliable, making it a popular choice for developers. Additionally, SQLite is open source and requires no setup or administration, making it easy to integrate with any project.[^6] With its ability to handle large amounts of data and its support for SQL, SQLite provides a powerful solution for data storage and retrieval. Furthermore, SQLite is cross-platform compatible, which means that the application can run seamlessly on different operating systems such as Windows, Linux and macOS.
 
-[^4]:SQLite Home Page, https://www.sqlite.org/index.html. Accessed 10 March 2023.
-[^5]:“What is SQLite? And When to Use It?” Simplilearn, 16 February 2023, https://www.simplilearn.com/tutorials/sql-tutorial/what-is-sqlite. Accessed 10 March 2023.
+[^5]:SQLite Home Page, https://www.sqlite.org/index.html. Accessed 10 March 2023.
+[^6]:“What is SQLite? And When to Use It?” Simplilearn, 16 February 2023, https://www.simplilearn.com/tutorials/sql-tutorial/what-is-sqlite. Accessed 10 March 2023.
 
 ## Success Criteria
 1. Login and Register system (Encrypt password)
